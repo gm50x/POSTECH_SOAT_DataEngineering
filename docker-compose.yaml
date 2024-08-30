@@ -26,3 +26,23 @@ services:
           }
         ]
       })' && if [ $(mongosh -u fiap -p fiap --quiet --host mongodb:27017 --eval 'rs.status().ok') -eq 1 ]; then exit 0; else exit 1; fi"
+  redis:
+    image: redis:7.4-alpine
+    command: redis-server --requirepass fiap
+    container_name: fiap-redis
+    hostname: redis
+    ports:
+      - 6379:6379
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    depends_on: [redis]
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_HOSTS: "redis"
+      REDIS_PORT: "redis:6379"
+      REDIS_PASSWORD: "fiap"
+    ports:
+      - "16379:8081"
