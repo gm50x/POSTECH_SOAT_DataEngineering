@@ -1,4 +1,4 @@
-# Mongodb
+# Mongodb - Document
 
 ```bash
 # Connect to mongodb
@@ -51,7 +51,7 @@ db.boletos.find({ amount_paid: { $lte: 150.00 }})
 
 ```
 
-# Redis
+# Redis - Key Value
 
 ```bash
 # Connecting to redis
@@ -114,4 +114,94 @@ ZRANGE
 # this did not work
 # Seting a key value with expiration at given unix timestamp
 SETEXAT {keyname} {unixTimestamp} {keyvalue}
+```
+
+# Cassandra - Colunar
+```bash
+# Connecting to Cassandra
+cqlsh -u {user} -p {password}
+
+# Describe Keyspaces
+DESC keyspaces
+DESCRIBE keyspaces
+
+# Create a Keyspace
+CREATE KEYSPACE {keyspacename} 
+WITH replication = {
+  'class': '{SimpleStrategy | NetworkTopologyStrategy}',
+  'replication_factor': {integer}
+};
+
+# Setup keyspace
+USE {keyspacename}
+
+# Create a table (similar to SQL)
+CREATE TABLE {tablename} (
+  <col> <type>,
+  <otherCol> <type>,
+  ...
+  PRIMARY KEY (key column)
+);
+
+CREATE TABLE hello_cassandra (
+  id INT,
+  name TEXT,
+  PRIMARY KEY (id)
+);
+
+# Check tables
+DESC tables;
+
+# Insert a single record
+INSERT INTO hello_cassandra (
+  id, name
+) VALUES ( 1, 'Jack Sparrow' );
+
+# Insert multiple records
+BEGIN BATCH
+  INSERT INTO hello_cassandra (id, name) VALUES ( 2, 'David Jones' );
+  INSERT INTO hello_cassandra (id, name) VALUES ( 3, 'Hector Barbossa' );
+APPLY BATCH;
+
+
+# QUERYING...
+SELECT * FROM hello_cassandra;
+SELECT * FROM hello_cassandra WHERE id = 1;
+
+# Update a record
+UPDATE hello_cassandra SET name = 'William Turner' WHERE id = 1;
+
+# Deleting a record...
+DELETE FROM hello_cassandra WHERE id = 1;
+
+# Example
+CREATE KEYSPACE ecommerce
+WITH replication = {
+  'class': 'SimpleStrategy',
+  'replication_factor': 4
+};
+
+CREATE TABLE charges (
+  customer_id UUID,
+  charge_id UUID,
+  amount DECIMAL,
+  created_at TIMESTAMP,
+  status TEXT,
+  coupon TEXT,
+  PRIMARY KEY (customer_id, charge_id)
+);
+
+BEGIN BATCH
+  INSERT INTO charges (customer_id, charge_id, amount, created_at, status, coupon) 
+  VALUES ( e5b52892-9911-431a-a807-1643d0bf0c67, 29451f30-ad94-4334-80c8-cba4c1a40da1, 1056.00, toUnixTimestamp(now()), 'ACTIVE', '#blackfriday');
+  INSERT INTO charges (customer_id, charge_id, amount, created_at, status) 
+  VALUES ( b42fdaad-9868-4d5f-90d0-e54e8b5ffb2a, 277e9eef-c821-403c-a02a-b55e9d41a7a2, 943.56, toUnixTimestamp(now()), 'ACTIVE');
+  INSERT INTO charges (customer_id, charge_id, amount, created_at, status, coupon) 
+  VALUES ( e42397c1-e581-423e-a3b1-0a472cfe3977, f4b30186-f551-4043-ad8b-cd73ad223b64, 211.10, toUnixTimestamp(now()), 'CANCELLED', '#compremais' );
+  INSERT INTO charges (customer_id, charge_id, amount, created_at, status, coupon) 
+  VALUES ( ee869ecf-1136-493a-a84e-821c40fa74a5, a0b3d797-ed2d-4f5f-b729-3826c1a54dcd, 2259.99, toUnixTimestamp(now()), 'ACTIVE', '#compremais' );
+  INSERT INTO charges (customer_id, charge_id, amount, created_at, status) 
+  VALUES ( e5b52892-9911-431a-a807-1643d0bf0c67, aa67fe3f-4a52-40b0-9cc0-a9581caf8c95, 98.90, toUnixTimestamp(now()), 'ACTIVE');
+APPLY BATCH;
+
 ```

@@ -38,7 +38,7 @@ services:
     hostname: redis-commander
     depends_on: [redis]
     image: rediscommander/redis-commander:latest
-    restart: always
+    restart: on-failure
     environment:
       REDIS_HOST: "redis"
       REDIS_HOSTS: "redis"
@@ -46,3 +46,14 @@ services:
       REDIS_PASSWORD: "fiap"
     ports:
       - "16379:8081"
+  cassandra:
+    image: cassandra:5.0
+    container_name: fiap-cassandra
+    restart: on-failure
+    environment:
+      CASSANDRA_USER: fiap
+      CASSANDRA_PASSWORD: fiap
+    ports:
+      - 9042:9042 # CQL Transport
+      - 7199:7199 # Thrift Client API
+      - 9160:9160 # JMX
