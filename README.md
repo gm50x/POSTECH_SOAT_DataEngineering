@@ -116,7 +116,7 @@ ZRANGE
 SETEXAT {keyname} {unixTimestamp} {keyvalue}
 ```
 
-# Cassandra - Colunar
+# Cassandra - Columnar
 ```bash
 # Connecting to Cassandra
 cqlsh -u {user} -p {password}
@@ -203,5 +203,87 @@ BEGIN BATCH
   INSERT INTO charges (customer_id, charge_id, amount, created_at, status) 
   VALUES ( e5b52892-9911-431a-a807-1643d0bf0c67, aa67fe3f-4a52-40b0-9cc0-a9581caf8c95, 98.90, toUnixTimestamp(now()), 'ACTIVE');
 APPLY BATCH;
+
+```
+
+# Neo4J - Graph
+
+```bash
+# navigate to localhost:7474 and login with user neo4j and pass fiap@neo4j
+
+# See databases
+SHOW DATABASE
+
+# Creating a new Database (Does not work on community)
+CREATE DATABASE {name}
+
+# Changing database
+:use {database name}
+
+# Creating a Node
+CREATE (:label {prop:value,otherprod:othervalue})
+
+# Creating a related Nodes
+CREATE(:label {prop:value}) -[:relationship]->(:label2 {prop2:value2})
+
+# Relating nodes
+MATCH(n:label), (m:label) WHERE n.prop = value AND m.prop = value CREATE (n)-[:relationship]->(m)_
+
+# Updating a node
+MATCH(:Label{prop:value}) SET n.prop2 = value;
+
+# Deleting nodes
+MATCH(n:label{prop:value}) DETACH DELETE n
+
+# Delete all nodes
+MATCH(n) DETACH DELETE n
+
+# Insert multiple nodes and relationships
+CREATE 
+  (n:label:{prop:value}),
+  (m:label:{prop:value}),
+  (n:label)-[:relationship]->(m:label),
+  (n:label)-[:other-relationship]->(m:label)
+
+# Multiple Relations at once
+MATCH (n:label)(m:label) WHERE n.prop = value AND m.prop = value
+
+# Constraining
+CREATE CONSTRAINT ON (n:label) ASSERT n.prop IS UNIQUE
+CREATE CONSTRAINT {constriant_name} FOR (n:label) REQUIRE n.prop IS UNIQUE
+
+# Indexing
+CREATE INDEX {name} FOR (n:label) ON (n.prop)
+
+
+# Example
+CREATE (n:Pessoa{name: 'Luke Skywalker'})
+CREATE (n:Pessoa{name: 'Anakin Skywalker'})
+
+MATCH(n:Pessoa),(m:Pessoa) WHERE n.name = 'Anakin Skywalker' and m.name = 'Luke Skywalker' CREATE (n) -[:FatherOf]-> (m)
+
+MATCH(n:pessoa{name: 'Luke Skywalker'}) SET n.age = 19
+CREATE (n:Pessoa{name: 'Obiwan Kenobi'})-[:Teaches]->(m:Pessoa {name: 'Padmé Amidala'})
+CREATE (n:Pessoa{name: 'Yoda'})-[:BornIn]->(m:Planet {name: 'Dagobah'})
+CREATE (n:Pessoa{name: 'Rey'})
+
+MATCH(n:Pessoa),(m:Pessoa) WHERE n.name = 'Yoda' and m.name = 'Luke Skywalker' CREATE (n) -[:Teaches]-> (m)
+MATCH(n:Pessoa),(m:Pessoa) WHERE n.name = 'Yoda' and m.name = 'Obiwan Kenobi' CREATE (n) -[:Teaches]-> (m)
+MATCH(n:Pessoa),(m:Pessoa) WHERE n.name = 'Anakin Skywalker' and m.name = 'Padmé Amidala' CREATE (n) -[:MariedTo]-> (m)
+MATCH(n:Pessoa),(m:Pessoa) WHERE n.name = 'Padmé Amidala' and m.name = 'Luke Skywalker' CREATE (n) -[:MotherOf]-> (m)
+MATCH(n:Pessoa),(m:Pessoa) WHERE n.name = 'Obiwan Kenobi' and m.name = 'Luke Skywalker' CREATE (n) -[:Teaches]-> (m)
+MATCH(n:Pessoa),(m:Pessoa) WHERE n.name = 'Luke Skywalker' and m.name = 'Rey' CREATE (n) -[:Teaches]-> (m)
+
+# Querying...
+MATCH(n:Pessoa) WHERE n.age is null return n;
+MATCH(n:Pessoa) WHERE n.age = 19 return n;
+
+# Querying by relationship
+MATCH(n:Pessoa)-[:Teaches]->(m:Pessoa) return n,m
+MATCH(n:Pessoa)-[:Teaches]->(m:Pessoa)-[:MotherOf]->(o:Pessoa) return n,m,o
+
+# Querying by path e.g:(Yoda Teaches Obiwan who Luke who teaches Rey) *3  means Three Levels
+MATCH path = (n:Pessoa)-[:Teaches*2]->(m:Pessoa) return path
+MATCH path = (n:Pessoa)-[:Teaches*3]->(m:Pessoa) return path
 
 ```

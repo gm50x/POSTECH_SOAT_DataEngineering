@@ -14,7 +14,7 @@ services:
   mongodb_init:
     image: mongo:6
     container_name: fiap-mongodb-init
-    restart: "on-failure"
+    restart: on-failure
     depends_on: [mongodb]
     command: >-
       sh -c "sleep 10 && mongosh -u fiap -p fiap --host mongodb:27017 --eval 'rs.initiate({
@@ -57,3 +57,12 @@ services:
       - 9042:9042 # CQL Transport
       - 7199:7199 # Thrift Client API
       - 9160:9160 # JMX
+  neo4j:
+    image: neo4j:5.23-community
+    container_name: fiap-neo4j
+    restart: on-failure
+    ports:
+      - 7474:7474 # http interface
+      - 7687:7687 # bolt interface
+    environment:
+      NEO4J_AUTH: neo4j/fiap@neo4j # user/pass
